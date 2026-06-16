@@ -186,7 +186,7 @@
         <h1>Apprenez à chanter<br><span>rapidement &amp; facilement</span></h1>
         <p>Des cours de chant complets en vidéo, PDF et exercices vocaux pour développer votre voix dès aujourd'hui — livraison rapide après paiement.</p>
         <div class="hero-btns">
-            <a href="#revendeur" class="btn-primary">Créer mon compte gratuitement</a>
+            <a href="#gate-msg" class="btn-primary">Créer mon compte gratuitement</a>
         </div>
         <div class="hero-stats">
             <div class="stat"><div class="stat-number">500+</div><div class="stat-label">Élèves formés</div></div>
@@ -198,8 +198,18 @@
 
 <section id="gate-msg" style="text-align:center;padding:2rem 1.5rem">
     <div class="section-badge" style="margin:0 auto 1rem">🔒 Accès réservé</div>
-    <h2 style="margin-bottom:0.5rem">Créez un compte pour voir les formations</h2>
-    <p style="color:#aaa">Choisissez <strong>Élève</strong> ou <strong>Revendeur</strong> ci-dessous pour débloquer l'accès aux formations.</p>
+    <h2 style="margin-bottom:0.5rem">Créez un compte pour continuer</h2>
+    <p style="color:#aaa;margin-bottom:2rem">Choisissez votre profil pour commencer</p>
+    <div style="display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;max-width:600px;margin:0 auto">
+        <button type="button" onclick="chooseType('eleve')" style="flex:1;min-width:220px;background:rgba(108,61,232,0.1);border:2px solid rgba(108,61,232,0.4);border-radius:16px;padding:2rem 1.5rem;color:#fff;cursor:pointer;font-size:1.05rem;font-weight:700">
+            <div style="font-size:2.5rem;margin-bottom:0.8rem">🎓</div>
+            Je suis Élève
+        </button>
+        <button type="button" onclick="chooseType('revendeur')" style="flex:1;min-width:220px;background:rgba(240,165,0,0.1);border:2px solid rgba(240,165,0,0.4);border-radius:16px;padding:2rem 1.5rem;color:#fff;cursor:pointer;font-size:1.05rem;font-weight:700">
+            <div style="font-size:2.5rem;margin-bottom:0.8rem">💼</div>
+            Je suis Revendeur
+        </button>
+    </div>
 </section>
 
 <section id="produits" style="display:none">
@@ -272,19 +282,19 @@
     </div>
 </section>
 
-<section id="revendeur">
-    <div class="section-header">
+<section id="revendeur" style="display:none">
+    <div class="section-header" id="revendeur-intro" style="display:none">
         <div class="section-badge">💼 Programme Revendeur</div>
         <h2>Gagnez <span style="color:#f0a500">1 500 Ar</span> par vente</h2>
         <p>Inscrivez-vous gratuitement, partagez votre lien et gagnez des commissions automatiques à chaque client</p>
     </div>
-    <div class="benefits-grid">
+    <div class="benefits-grid" id="revendeur-benefits" style="display:none">
         <div class="benefit-card"><div class="benefit-icon">💰</div><h4>1 500 Ar / vente</h4><p>Commission créditée automatiquement sur votre compte à chaque vente</p></div>
         <div class="benefit-card"><div class="benefit-icon">🔗</div><h4>Lien unique</h4><p>Votre lien personnalisé pour suivre et référer vos clients</p></div>
         <div class="benefit-card"><div class="benefit-icon">📊</div><h4>Dashboard live</h4><p>Suivi en temps réel de votre solde, ventes et historique</p></div>
         <div class="benefit-card"><div class="benefit-icon">⚡</div><h4>Inscription gratuite</h4><p>Aucun investissement requis — commencez à gagner immédiatement</p></div>
     </div>
-    <div class="form-container" id="rev-form-wrap">
+    <div class="form-container" id="rev-form-wrap" style="display:none">
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('ins')">S'inscrire</button>
             <button class="tab-btn" onclick="switchTab('con')">Se connecter</button>
@@ -296,7 +306,7 @@
         <div style="text-align:center;color:#888;margin-bottom:1rem;font-size:0.85rem">— ou —</div>
         <div id="tab-ins">
             <form onsubmit="inscrire(event)">
-                <div class="form-group">
+                <div class="form-group" style="display:none">
                     <label>Type de compte</label>
                     <select id="r-type" required onchange="toggleCompteType()">
                         <option value="">-- Choisissez --</option>
@@ -526,6 +536,19 @@ window.toggleCompteType = () => {
         payWrap.style.display = 'none';
         payInput.required = false;
     }
+};
+
+window.chooseType = (type) => {
+    document.getElementById('r-type').value = type;
+    toggleCompteType();
+    document.getElementById('gate-msg').style.display = 'none';
+    document.getElementById('revendeur').style.display = 'block';
+    document.getElementById('rev-form-wrap').style.display = 'block';
+    if (type === 'revendeur') {
+        document.getElementById('revendeur-intro').style.display = 'block';
+        document.getElementById('revendeur-benefits').style.display = 'grid';
+    }
+    document.getElementById('revendeur').scrollIntoView({ behavior: 'smooth' });
 };
 
 window.inscrire = async (e) => {
