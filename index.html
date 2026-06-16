@@ -149,6 +149,8 @@
         .referral-box { background: rgba(108,61,232,0.1); border: 1px solid rgba(108,61,232,0.3); border-radius: 15px; padding: 1.5rem; margin-bottom: 2rem; }
         .referral-box h4 { font-weight: 700; margin-bottom: 0.5rem; }
         .referral-box p { color: #6b7280; font-size: 0.85rem; margin-bottom: 1rem; }
+        #btn-retrait { display: inline-block; text-decoration: none; }
+        #btn-retrait.disabled { opacity: 0.4; pointer-events: none; cursor: not-allowed; }
         .link-row { display: flex; gap: 0.5rem; }
         .link-row input { flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: #a78bfa; padding: 0.8rem 1rem; border-radius: 10px; font-size: 0.8rem; outline: none; }
         .btn-copy { background: var(--primary); color: white; border: none; padding: 0.8rem 1rem; border-radius: 10px; cursor: pointer; font-size: 0.85rem; white-space: nowrap; }
@@ -210,7 +212,7 @@
         <h1>Apprenez à chanter<br><span>rapidement &amp; facilement</span></h1>
         <p>Des cours de chant complets en vidéo, PDF et exercices vocaux pour développer votre voix dès aujourd'hui — livraison rapide après paiement.</p>
         <div class="hero-btns" id="hero-btns">
-            <a href="#gate-msg" class="btn-primary" id="hero-cta" onclick="event.preventDefault();document.getElementById('gate-msg').scrollIntoView({behavior:'smooth',block:'start'});">Créer mon compte gratuitement</a>
+            <a href="#gate-msg" class="btn-primary" id="hero-cta" onclick="event.preventDefault();document.getElementById('gate-msg').scrollIntoView({behavior:'smooth',block:'start'});">Continuer avec Google</a>
         </div>
         <div class="hero-stats">
             <div class="stat"><div class="stat-number">500+</div><div class="stat-label">Élèves formés</div></div>
@@ -407,6 +409,11 @@
                 <button class="btn-copy" onclick="copyLink()">📋 Copier</button>
             </div>
         </div>
+        <div class="referral-box">
+            <h4>💵 Retrait de votre solde</h4>
+            <p>Retrait minimum : <strong>20 000 Ar</strong>. Une fois ce montant atteint, demandez votre retrait via WhatsApp.</p>
+            <a id="btn-retrait" class="btn-primary disabled" target="_blank" rel="noopener">💸 Demander un retrait</a>
+        </div>
         <div class="ventes-section">
             <h4>📋 Historique de mes ventes</h4>
             <div id="ventes-list"><div class="empty-state">Aucune vente pour le moment</div></div>
@@ -480,6 +487,7 @@ const googleProvider = new GoogleAuthProvider();
 const MVOLA  = "0381821125";
 const OM     = "0322217709";
 const WA_NUM = "261322217709";
+const RETRAIT_MIN = 20000;
 
 let ORDER = {};
 let ME = null;
@@ -826,6 +834,8 @@ window.logout = () => {
     document.getElementById('dashboard').classList.remove('active');
     document.getElementById('rev-form-wrap').style.display = 'block';
     document.querySelector('#revendeur .benefits-grid').style.display = 'grid';
+    document.getElementById('produits').style.display = 'none';
+    document.getElementById('commander').style.display = 'none';
 };
 
 async function showDash() {
@@ -835,12 +845,23 @@ async function showDash() {
 
     document.getElementById('rev-form-wrap').style.display = 'none';
     document.querySelector('#revendeur .benefits-grid').style.display = 'none';
+    document.getElementById('produits').style.display = 'none';
+    document.getElementById('commander').style.display = 'none';
     document.getElementById('dashboard').classList.add('active');
     document.getElementById('d-nom').textContent = ME.nom;
     document.getElementById('d-solde').textContent = (ME.solde || 0).toLocaleString('fr') + ' Ar';
     document.getElementById('d-ventes').textContent = ME.totalVentes || 0;
     document.getElementById('d-gains').textContent = (ME.totalGains || 0).toLocaleString('fr') + ' Ar';
     document.getElementById('ref-link').value = `${location.origin}${location.pathname}?ref=${ME.code}`;
+    const solde = ME.solde || 0;
+    const btnRetrait = document.getElementById('btn-retrait');
+    if (solde >= RETRAIT_MIN) {
+        btnRetrait.classList.remove('disabled');
+        btnRetrait.href = `https://wa.me/261322217709?text=${encodeURIComponent('Bonjour, je souhaite retirer mon solde de ' + solde.toLocaleString('fr') + ' Ar (code: ' + ME.code + ')')}`;
+    } else {
+        btnRetrait.classList.add('disabled');
+        btnRetrait.href = '#';
+    }
     loadVentes();
     document.getElementById('dashboard').scrollIntoView({ behavior: 'smooth' });
 }
