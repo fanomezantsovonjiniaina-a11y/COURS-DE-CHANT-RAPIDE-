@@ -600,7 +600,7 @@ window.loginWithGoogle = async () => {
         await signInWithRedirect(auth, googleProvider);
     } catch (err) {
         console.error(err);
-        toast('❌ Connexion Google échouée.', 'err');
+        toast('❌ Erreur: ' + (err.code || err.message || err), 'err');
         btn.disabled = false;
     }
 };
@@ -677,7 +677,7 @@ getRedirectResult(auth).then((result) => {
     }
 }).catch((err) => {
     console.error(err);
-    toast('❌ Connexion Google échouée.', 'err');
+    toast('❌ Erreur: ' + (err.code || err.message || err), 'err');
 });
 
 window.connecter = async (e) => {
