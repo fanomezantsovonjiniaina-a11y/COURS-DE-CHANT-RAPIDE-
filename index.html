@@ -186,6 +186,8 @@
         @keyframes rot { to { transform: rotate(360deg); } }
         .wa-float { position: fixed; bottom: 2rem; left: 2rem; width: 55px; height: 55px; background: #25d366; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; text-decoration: none; z-index: 1000; box-shadow: 0 5px 20px rgba(37,211,102,0.4); transition: transform 0.3s; }
         .wa-float:hover { transform: scale(1.1); }
+        .back-float { position: fixed; bottom: 2rem; left: 6.5rem; width: 55px; height: 55px; background: #6c3de8; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; text-decoration: none; z-index: 1000; box-shadow: 0 5px 20px rgba(108,61,232,0.4); transition: transform 0.3s; border: none; cursor: pointer; color: #fff; }
+        .back-float:hover { transform: scale(1.1); }
         @media (max-width: 768px) {
             nav { padding: 1rem; }
             .nav-links { display: none; position: absolute; top: 65px; left: 0; right: 0; background: rgba(15,10,30,0.98); flex-direction: column; padding: 1rem 2rem; gap: 1rem; border-bottom: 1px solid rgba(108,61,232,0.3); }
@@ -462,6 +464,12 @@
             </div>
             <div class="pay-instructions" id="pay-info"></div>
             <div class="form-group"><label>Code revendeur (optionnel)</label><input type="text" id="o-code" placeholder="Si vous avez un code" style="text-transform:uppercase"></div>
+            <div class="form-group" style="background:rgba(240,165,0,0.1);border:1px solid rgba(240,165,0,0.3);border-radius:10px;padding:0.8rem;margin-top:0.5rem">
+                <label style="display:flex;align-items:flex-start;gap:0.6rem;cursor:pointer">
+                    <input type="checkbox" id="o-proof" required style="width:auto;margin-top:0.2rem">
+                    <span style="font-size:0.85rem">⚠️ Je comprends que ma commande ne sera validée que si j'envoie la <strong>capture d'écran de la transaction</strong> dans le message WhatsApp qui va s'ouvrir. Sans cette capture, ma commande reste en attente indéfiniment.</span>
+                </label>
+            </div>
             <button type="submit" class="btn-order" id="btn-order" style="margin-top:0.5rem">✅ Confirmer ma commande</button>
         </form>
     </div>
@@ -479,6 +487,7 @@
 </section>
 
 <div class="toast" id="toast"></div>
+<button type="button" class="back-float" onclick="goHome()" title="Retour à l'accueil">⬅</button>
 <a href="https://wa.me/261322217709" class="wa-float" target="_blank">💬</a>
 
 <script type="module">
@@ -649,10 +658,10 @@ window.submitOrder = async (e) => {
             commission: 1500
         });
 
-        const msg = encodeURIComponent(`Bonjour, je viens de commander "${ORDER.title}" (${ORDER.price.toLocaleString('fr')} Ar) via ${paiement === 'mvola' ? 'MVola' : 'Orange Money'}. Nom : ${nom}. Voici ma preuve de paiement :`);
+        const msg = encodeURIComponent(`Bonjour, je viens de commander "${ORDER.title}" (${ORDER.price.toLocaleString('fr')} Ar) via ${paiement === 'mvola' ? 'MVola' : 'Orange Money'}. Nom : ${nom}.\n\n📸 IMPORTANT : joignez ici la capture d'écran de votre transaction. Sans cette capture, votre commande ne sera pas validée.`);
         window.open(`https://wa.me/${WA_NUM}?text=${msg}`, '_blank');
 
-        toast('✅ Commande enregistrée ! Envoyez votre preuve de paiement sur WhatsApp.', 'ok');
+        toast('✅ Commande enregistrée ! Sur WhatsApp, joignez la capture d\'écran de paiement — sans elle, la commande ne sera jamais validée.', 'ok');
         setTimeout(closeModal, 2000);
         e.target.reset();
     } catch (err) {
