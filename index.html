@@ -86,14 +86,16 @@
         .section-header p { color: #9ca3af; max-width: 500px; margin: 0 auto; line-height: 1.6; }
         #produits { background: rgba(108,61,232,0.03); }
         .products-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap: 2rem; max-width: 1100px; margin: 0 auto; }
-        .product-card { background: linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015)); border: 1px solid rgba(255,255,255,0.08); border-radius: 22px; padding: 2.2rem; transition: all 0.35s ease; position: relative; overflow: hidden; }
+        .product-card { background: linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015)); border: 1px solid rgba(255,255,255,0.08); border-radius: 22px; padding: 0 2.2rem 2.2rem; transition: all 0.35s ease; position: relative; overflow: hidden; }
         .product-card:hover { transform: translateY(-10px); border-color: rgba(108,61,232,0.5); box-shadow: 0 25px 60px rgba(108,61,232,0.2); }
         .product-card.featured { border-color: rgba(240,165,0,0.45); background: linear-gradient(160deg, rgba(240,165,0,0.08), rgba(255,255,255,0.015)); }
-        .product-card.featured::before { content: '⭐ Populaire'; position: absolute; top: 1rem; right: 1rem; background: var(--secondary); color: #000; padding: 0.25rem 0.85rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+        .product-card.featured::before { content: '⭐ Populaire'; position: absolute; top: 1rem; right: 1rem; background: var(--secondary); color: #000; padding: 0.25rem 0.85rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; z-index: 2; }
+        .product-cover { width: calc(100% + 4.4rem); margin: 0 -2.2rem 1.5rem; height: 170px; object-fit: cover; display: block; }
         .product-icon { width: 60px; height: 60px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 1.5rem; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06); }
         .product-icon.video { background: rgba(108,61,232,0.2); }
         .product-icon.pdf { background: rgba(239,68,68,0.2); }
         .product-icon.vocal { background: rgba(16,185,129,0.2); }
+        .product-icon.livre { background: rgba(240,165,0,0.2); }
         .product-card h3 { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.8rem; }
         .product-card > p { color: #6b7280; font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.5rem; }
         .product-features { list-style: none; margin-bottom: 1.5rem; }
@@ -204,7 +206,7 @@
 
 <section class="hero">
     <div class="hero-content">
-        <div class="hero-badge">🎤 Formation vocale professionnelle</div>
+        <div class="hero-badge">🎤 Formation vocale professionnelle — Coach Vonjy</div>
         <h1>Apprenez à chanter<br><span>rapidement &amp; facilement</span></h1>
         <p>Des cours de chant complets en vidéo, PDF et exercices vocaux pour développer votre voix dès aujourd'hui — livraison rapide après paiement.</p>
         <div class="hero-btns" id="hero-btns">
@@ -218,15 +220,28 @@
 </section>
 
 <section id="gate-msg" style="text-align:center;padding:2rem 1.5rem">
-    <div class="section-badge" style="margin:0 auto 1rem">🔒 Accès réservé</div>
-    <h2 style="margin-bottom:0.5rem">Créez un compte pour continuer</h2>
-    <p style="color:#aaa;margin-bottom:2rem">Choisissez votre profil pour commencer</p>
-    <div style="display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;max-width:600px;margin:0 auto">
-        <button type="button" onclick="chooseType('eleve')" style="flex:1;min-width:220px;background:rgba(108,61,232,0.1);border:2px solid rgba(108,61,232,0.4);border-radius:16px;padding:2rem 1.5rem;color:#fff;cursor:pointer;font-size:1.05rem;font-weight:700">
-            <div style="font-size:2.5rem;margin-bottom:0.8rem">🎓</div>
-            Je suis Élève
+    <div class="section-badge" style="margin:0 auto 1rem">🔒 Étape 1</div>
+    <h2 style="margin-bottom:0.5rem">Connectez-vous pour continuer</h2>
+    <p style="color:#aaa;margin-bottom:2rem">Utilisez votre compte Google pour créer votre compte en un clic</p>
+    <div style="max-width:380px;margin:0 auto">
+        <button type="button" onclick="loginWithGoogle()" id="btn-google-gate" style="width:100%;padding:1rem;border-radius:50px;border:1px solid #444;background:#1a1a2e;color:#fff;display:flex;align-items:center;justify-content:center;gap:0.6rem;cursor:pointer;font-weight:700;font-size:1.02rem">
+            <svg width="20" height="20" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.85 2.08-1.81 2.72v2.26h2.92c1.71-1.57 2.69-3.88 2.69-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.71H.96v2.33C2.44 15.98 5.48 18 9 18z"/><path fill="#FBBC05" d="M3.97 10.71c-.18-.54-.28-1.11-.28-1.71s.1-1.17.28-1.71V4.96H.96C.35 6.18 0 7.55 0 9s.35 2.82.96 4.04l3.01-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg>
+            Continuer avec Google
         </button>
-        <button type="button" onclick="chooseType('revendeur')" style="flex:1;min-width:220px;background:rgba(240,165,0,0.1);border:2px solid rgba(240,165,0,0.4);border-radius:16px;padding:2rem 1.5rem;color:#fff;cursor:pointer;font-size:1.05rem;font-weight:700">
+        <p style="margin-top:1.5rem;color:#6b7280;font-size:0.85rem">Vous préférez un compte par téléphone ? <a href="#" onclick="event.preventDefault();chooseType('eleve')" style="color:#a78bfa">Cliquez ici</a></p>
+    </div>
+</section>
+
+<section id="type-choice" style="display:none;text-align:center;padding:2rem 1.5rem">
+    <div class="section-badge" style="margin:0 auto 1rem">🔒 Étape 2</div>
+    <h2 style="margin-bottom:0.5rem">Choisissez votre profil</h2>
+    <p style="color:#aaa;margin-bottom:2rem">Bienvenue <span id="tc-nom" style="color:#a78bfa;font-weight:700"></span> ! Comment voulez-vous utiliser votre compte ?</p>
+    <div style="display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;max-width:600px;margin:0 auto">
+        <button type="button" onclick="finishGoogleSignup('eleve')" style="flex:1;min-width:220px;background:rgba(108,61,232,0.1);border:2px solid rgba(108,61,232,0.4);border-radius:16px;padding:2rem 1.5rem;color:#fff;cursor:pointer;font-size:1.05rem;font-weight:700">
+            <div style="font-size:2.5rem;margin-bottom:0.8rem">🎓</div>
+            Je suis Acheteur
+        </button>
+        <button type="button" onclick="finishGoogleSignup('revendeur')" style="flex:1;min-width:220px;background:rgba(240,165,0,0.1);border:2px solid rgba(240,165,0,0.4);border-radius:16px;padding:2rem 1.5rem;color:#fff;cursor:pointer;font-size:1.05rem;font-weight:700">
             <div style="font-size:2.5rem;margin-bottom:0.8rem">💼</div>
             Je suis Revendeur
         </button>
@@ -241,6 +256,7 @@
     </div>
     <div class="products-grid">
         <div class="product-card featured">
+            <img class="product-cover" src="images/cover-video.jpg" alt="Cours en Vidéo">
             <div class="product-icon video">🎬</div>
             <h3>Cours en Vidéo</h3>
             <p>Cours complets filmés avec démonstrations pratiques et exercices guidés pas à pas.</p>
@@ -251,12 +267,13 @@
                 <li>Chansons complètes apprises</li>
                 <li>Accès immédiat après paiement</li>
             </ul>
-            <div class="product-price">15 000 Ar <span>/ accès complet</span></div>
-            <button class="btn-order" onclick="openOrder('video','Cours en Vidéo',15000)">Commander maintenant</button>
+            <div class="product-price">20 000 Ar <span>/ accès complet</span></div>
+            <button class="btn-order" onclick="openOrder('video','Cours en Vidéo',20000)">Commander maintenant</button>
         </div>
         <div class="product-card">
+            <img class="product-cover" src="images/cover-pdf.jpg" alt="Chanter avec Assurance (PDF)">
             <div class="product-icon pdf">📄</div>
-            <h3>Cours en PDF</h3>
+            <h3>Chanter avec Assurance (PDF)</h3>
             <p>Guide complet avec illustrations, exercices écrits et partitions pour chanter juste.</p>
             <ul class="product-features">
                 <li>Guide illustré complet</li>
@@ -265,12 +282,27 @@
                 <li>Théorie musicale simplifiée</li>
                 <li>Téléchargement immédiat</li>
             </ul>
-            <div class="product-price">12 000 Ar <span>/ PDF complet</span></div>
-            <button class="btn-order" onclick="openOrder('pdf','Cours en PDF',12000)">Commander maintenant</button>
+            <div class="product-price">15 000 Ar <span>/ PDF complet</span></div>
+            <button class="btn-order" onclick="openOrder('pdf','Chanter avec Assurance (PDF)',15000)">Commander maintenant</button>
+        </div>
+        <div class="product-card" style="padding-top:2.2rem">
+            <div class="product-icon livre">📕</div>
+            <h3>Chanter avec Assurance (Livre imprimé)</h3>
+            <p>La version papier du guide, imprimée et reliée, livrée chez vous pour chanter juste à tout moment.</p>
+            <ul class="product-features">
+                <li>Livre imprimé &amp; relié</li>
+                <li>Partitions incluses</li>
+                <li>Théorie musicale simplifiée</li>
+                <li>Idéal sans connexion internet</li>
+                <li>Livraison après paiement</li>
+            </ul>
+            <div class="product-price">25 000 Ar <span>/ livre imprimé</span></div>
+            <button class="btn-order" onclick="openOrder('livre','Chanter avec Assurance (Livre imprimé)',25000)">Commander maintenant</button>
         </div>
         <div class="product-card">
+            <img class="product-cover" src="images/cover-warmup.jpg" alt="Exercices Vocaux Warump">
             <div class="product-icon vocal">🎙️</div>
-            <h3>Exercices Vocaux</h3>
+            <h3>Exercices Vocaux Warump</h3>
             <p>Programme audio de vocalises progressives pour renforcer et développer votre voix.</p>
             <ul class="product-features">
                 <li>Vocalises progressives</li>
@@ -279,8 +311,8 @@
                 <li>Justesse et intonation</li>
                 <li>Fichiers audio inclus</li>
             </ul>
-            <div class="product-price">15 000 Ar <span>/ programme complet</span></div>
-            <button class="btn-order" onclick="openOrder('exercice','Exercices Vocaux',15000)">Commander maintenant</button>
+            <div class="product-price">20 000 Ar <span>/ programme complet</span></div>
+            <button class="btn-order" onclick="openOrder('exercice','Exercices Vocaux Warump',20000)">Commander maintenant</button>
         </div>
     </div>
 </section>
@@ -451,10 +483,12 @@ const WA_NUM = "261322217709";
 
 let ORDER = {};
 let ME = null;
+let pendingGoogleUser = null;
 
 window.unlockApp = () => {
     localStorage.setItem('cc_unlocked', '1');
     document.getElementById('gate-msg').style.display = 'none';
+    document.getElementById('type-choice').style.display = 'none';
     document.getElementById('produits').style.display = 'block';
     document.getElementById('commander').style.display = 'block';
     document.getElementById('hero-btns').style.display = 'none';
@@ -550,7 +584,7 @@ window.submitOrder = async (e) => {
 };
 
 function genCode(nom, tel) {
-    return nom.replace(/\\s+/g, '').toUpperCase().slice(0, 4).padEnd(4, 'X') + tel.replace(/\\D/g, '').slice(-4);
+    return nom.replace(/\s+/g, '').toUpperCase().slice(0, 4).padEnd(4, 'X') + tel.replace(/\D/g, '').slice(-4);
 }
 
 window.switchTab = (tab) => {
@@ -577,6 +611,7 @@ window.chooseType = (type) => {
     document.getElementById('r-type').value = type;
     toggleCompteType();
     document.getElementById('gate-msg').style.display = 'none';
+    document.getElementById('type-choice').style.display = 'none';
     document.getElementById('hero-btns').style.display = 'none';
     document.getElementById('revendeur').style.display = 'block';
     document.getElementById('rev-form-wrap').style.display = 'block';
@@ -700,9 +735,25 @@ async function processGoogleUser(user) {
             return;
         }
 
-        const veutRevendeur = confirm('Nouveau compte. Voulez-vous devenir Revendeur (gagner des commissions) ?\nOK = Revendeur, Annuler = Élève');
+        pendingGoogleUser = { nom, email, telephone: user.phoneNumber || '' };
+        document.getElementById('tc-nom').textContent = nom;
+        document.getElementById('gate-msg').style.display = 'none';
+        document.getElementById('hero-btns').style.display = 'none';
+        document.getElementById('type-choice').style.display = 'block';
+        document.getElementById('type-choice').scrollIntoView({ behavior: 'smooth' });
+    } catch (err) {
+        console.error(err);
+        toast('❌ Connexion Google annulée ou échouée.', 'err');
+    } finally {
+        if (btn) btn.disabled = false;
+    }
+}
 
-        if (veutRevendeur) {
+window.finishGoogleSignup = async (type) => {
+    if (!pendingGoogleUser) return;
+    const { nom, email, telephone } = pendingGoogleUser;
+    try {
+        if (type === 'revendeur') {
             const numeroPayment = prompt('Numéro MVola/Orange Money pour recevoir vos gains :');
             if (!numeroPayment) {
                 toast('❌ Numéro de paiement requis pour devenir revendeur.', 'err');
@@ -710,13 +761,9 @@ async function processGoogleUser(user) {
             }
             const code = genCode(nom, email);
             const docRef = await addDoc(collection(db, 'revendeurs'), {
-                nom, email,
-                telephone: user.phoneNumber || '',
-                numeroPayment,
-                code,
-                solde: 0,
-                totalVentes: 0,
-                totalGains: 0,
+                nom, email, telephone,
+                numeroPayment, code,
+                solde: 0, totalVentes: 0, totalGains: 0,
                 dateInscription: new Date().toISOString()
             });
             ME = { id: docRef.id, nom, email, numeroPayment, code, solde: 0, totalVentes: 0, totalGains: 0 };
@@ -732,13 +779,12 @@ async function processGoogleUser(user) {
             unlockApp();
             document.getElementById('produits').scrollIntoView({ behavior: 'smooth' });
         }
+        pendingGoogleUser = null;
     } catch (err) {
         console.error(err);
-        toast('❌ Connexion Google annulée ou échouée.', 'err');
-    } finally {
-        if (btn) btn.disabled = false;
+        toast('❌ Erreur. Réessayez.', 'err');
     }
-}
+};
 
 window.connecter = async (e) => {
     e.preventDefault();
