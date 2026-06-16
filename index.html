@@ -386,7 +386,7 @@
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
 import { getFirestore, collection, addDoc, getDocs, doc, getDoc, updateDoc, query, where, increment } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
-import { getAuth, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
+import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
 
 const FIREBASE_CONFIG = {
     apiKey: "AIzaSyBIVvfLhCXSn_Kw68DLSCcO4mSm-P2FY60",
@@ -597,8 +597,17 @@ window.loginWithGoogle = async () => {
     const btn = document.getElementById('btn-google');
     btn.disabled = true;
     try {
-        const result = await signInWithPopup(auth, googleProvider);
-        const user = result.user;
+        await signInWithRedirect(auth, googleProvider);
+    } catch (err) {
+        console.error(err);
+        toast('❌ Connexion Google échouée.', 'err');
+        btn.disabled = false;
+    }
+};
+
+async function processGoogleUser(user) {
+    const btn = document.getElementById('btn-google');
+    try {
         const email = user.email;
         const nom = user.displayName || email;
 
@@ -658,9 +667,18 @@ window.loginWithGoogle = async () => {
         console.error(err);
         toast('❌ Connexion Google annulée ou échouée.', 'err');
     } finally {
-        btn.disabled = false;
+        if (btn) btn.disabled = false;
     }
-};
+}
+
+getRedirectResult(auth).then((result) => {
+    if (result && result.user) {
+        processGoogleUser(result.user);
+    }
+}).catch((err) => {
+    console.error(err);
+    toast('❌ Connexion Google échouée.', 'err');
+});
 
 window.connecter = async (e) => {
     e.preventDefault();
