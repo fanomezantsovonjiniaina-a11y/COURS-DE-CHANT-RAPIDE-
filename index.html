@@ -211,6 +211,7 @@
         <li><a href="#commander" onclick="closeMenu()">Commander</a></li>
         <li><a href="#revendeur" onclick="closeMenu()">Revendeur</a></li>
         <li><a href="#revendeur" class="btn-nav" onclick="closeMenu()">Mon espace</a></li>
+        <li id="nav-logout" style="display:none"><a href="#" onclick="event.preventDefault();fullLogout()">🚪 Déconnexion</a></li>
     </ul>
     <button class="hamburger" onclick="toggleMenu()">☰</button>
 </nav>
@@ -575,8 +576,40 @@ const ADMIN_CODE = "VONJY2026";
 let ORDER = {};
 let ME = null;
 let pendingGoogleUser = null;
+let appStatePushed = false;
+
+function ensureBackState() {
+    if (!appStatePushed) {
+        history.pushState({ ccApp: true }, '', location.href);
+        appStatePushed = true;
+    }
+}
+
+window.addEventListener('popstate', (e) => {
+    if (!e.state || !e.state.ccApp) {
+        appStatePushed = false;
+        document.getElementById('auth-overlay').classList.remove('active');
+        document.body.style.overflow = '';
+        resetToHome();
+    }
+});
+
+function resetToHome() {
+    document.getElementById('dashboard').classList.remove('active');
+    document.getElementById('produits').style.display = 'none';
+    document.getElementById('commander').style.display = 'none';
+    document.getElementById('revendeur').style.display = 'none';
+    document.getElementById('hero-btns').style.display = 'flex';
+    closeMenu();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateLogoutNav() {
+    document.getElementById('nav-logout').style.display = localStorage.getItem('cc_unlocked') === '1' || ME ? 'block' : 'none';
+}
 
 window.openAuthOverlay = () => {
+    ensureBackState();
     document.getElementById('auth-overlay').classList.add('active');
     document.body.style.overflow = 'hidden';
 };
@@ -587,6 +620,7 @@ window.closeAuthOverlay = () => {
 };
 
 window.unlockApp = () => {
+    ensureBackState();
     localStorage.setItem('cc_unlocked', '1');
     closeAuthOverlay();
     document.getElementById('gate-msg').style.display = 'none';
@@ -594,10 +628,20 @@ window.unlockApp = () => {
     document.getElementById('produits').style.display = 'block';
     document.getElementById('commander').style.display = 'block';
     document.getElementById('hero-btns').style.display = 'none';
+    updateLogoutNav();
+};
+
+window.fullLogout = () => {
+    localStorage.removeItem('cc_unlocked');
+    ME = null;
+    document.getElementById('dashboard').classList.remove('active');
+    goHome();
+    updateLogoutNav();
+    toast('👋 Déconnecté.', 'ok');
 };
 
 if (localStorage.getItem('cc_unlocked') === '1') {
-    document.addEventListener('DOMContentLoaded', unlockApp);
+    document.addEventListener('DOMContentLoaded', () => { unlockApp(); });
 }
 
 window.openOrder = (type, title, price) => {
@@ -754,7 +798,9 @@ window.toggleCompteType = () => {
 };
 
 window.chooseType = (type) => {
+    ensureBackState();
     closeAuthOverlay();
+    updateLogoutNav();
     document.getElementById('r-type').value = type;
     toggleCompteType();
     document.getElementById('gate-msg').style.display = 'none';
@@ -967,25 +1013,25 @@ window.connecter = async (e) => {
 
 window.logout = () => {
     ME = null;
+    localStorage.removeItem('cc_unlocked');
     document.getElementById('dashboard').classList.remove('active');
     document.getElementById('rev-form-wrap').style.display = 'block';
     document.querySelector('#revendeur .benefits-grid').style.display = 'grid';
     document.getElementById('produits').style.display = 'none';
     document.getElementById('commander').style.display = 'none';
+    updateLogoutNav();
 };
 
 window.goHome = () => {
-    document.getElementById('dashboard').classList.remove('active');
-    document.getElementById('produits').style.display = 'none';
-    document.getElementById('commander').style.display = 'none';
-    document.getElementById('revendeur').style.display = 'none';
-    document.getElementById('hero-btns').style.display = 'flex';
-    closeMenu();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (appStatePushed) { history.back(); return; }
+    resetToHome();
 };
 
 async function showDash() {
     if (!ME) return;
+    ensureBackState();
+    localStorage.setItem('cc_unlocked', '1');
+    updateLogoutNav();
     const fresh = await getDoc(doc(db, 'revendeurs', ME.id));
     if (fresh.exists()) ME = { id: ME.id, ...fresh.data() };
 
