@@ -202,8 +202,9 @@
 <body>
 
 <nav>
-    <div class="logo">🎵 Chant Rapide</div>
+    <div class="logo" style="cursor:pointer" onclick="goHome()">🎵 Chant Rapide</div>
     <ul class="nav-links" id="nav-links">
+        <li><a href="#" onclick="event.preventDefault();goHome()">⬅ Accueil</a></li>
         <li><a href="#produits" onclick="closeMenu()">Formations</a></li>
         <li><a href="#commander" onclick="closeMenu()">Commander</a></li>
         <li><a href="#revendeur" onclick="closeMenu()">Revendeur</a></li>
@@ -466,6 +467,17 @@
     </div>
 </div>
 
+<section id="admin-panel" style="display:none">
+    <div class="section-header">
+        <div class="section-badge">🔐 Admin</div>
+        <h2>Commandes <span style="color:#a78bfa">à valider</span></h2>
+        <p>Validez une commande seulement après avoir reçu la preuve de paiement sur WhatsApp — la commission du revendeur est créditée uniquement à ce moment.</p>
+    </div>
+    <div class="dash-container">
+        <div id="admin-orders-list"><div class="empty-state">Chargement...</div></div>
+    </div>
+</section>
+
 <div class="toast" id="toast"></div>
 <a href="https://wa.me/261322217709" class="wa-float" target="_blank">💬</a>
 
@@ -493,7 +505,48 @@ document.addEventListener('DOMContentLoaded', () => {
         entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); } });
     }, { threshold: 0.15 });
     revealEls.forEach(el => obs.observe(el));
+
+    if (location.hash === '#admin') initAdmin();
 });
+
+function initAdmin() {
+    const pass = prompt('Code admin :');
+    if (pass !== ADMIN_CODE) { alert('Code incorrect.'); return; }
+    document.getElementById('admin-panel').style.display = 'block';
+    loadAdminOrders();
+}
+
+async function loadAdminOrders() {
+    const list = document.getElementById('admin-orders-list');
+    const snap = await getDocs(collection(db, 'commandes'));
+    const orders = [];
+    snap.forEach(d => orders.push({ id: d.id, ...d.data() }));
+    orders.sort((a, b) => new Date(b.date) - new Date(a.date));
+    if (!orders.length) {
+        list.innerHTML = '<div class="empty-state">Aucune commande</div>';
+        return;
+    }
+    list.innerHTML = orders.map(v => `
+        <div class="benefit-card" style="text-align:left;margin-bottom:1rem">
+            <h4>${v.titre} — ${(v.montant || 0).toLocaleString('fr')} Ar</h4>
+            <p>Client : ${v.clientNom} (${v.clientTel}) — ${v.paiement === 'mvola' ? 'MVola' : 'Orange Money'}</p>
+            <p>Code revendeur : ${v.codeRevendeur || '—'} | Statut : <strong>${v.statut === 'confirme' ? '✅ Confirmé' : '⏳ En attente'}</strong></p>
+            ${v.statut === 'confirme' ? '' : `<button class="btn-primary" onclick="validateOrder('${v.id}','${v.revendeurId || ''}')">✅ Valider le paiement</button>`}
+        </div>
+    `).join('');
+}
+
+window.validateOrder = async (orderId, revendeurId) => {
+    await updateDoc(doc(db, 'commandes', orderId), { statut: 'confirme' });
+    if (revendeurId) {
+        await updateDoc(doc(db, 'revendeurs', revendeurId), {
+            solde: increment(1500),
+            totalVentes: increment(1),
+            totalGains: increment(1500)
+        });
+    }
+    loadAdminOrders();
+};
 
 const app = initializeApp(FIREBASE_CONFIG);
 const db = getFirestore(app);
@@ -504,6 +557,7 @@ const MVOLA  = "0381821125";
 const OM     = "0322217709";
 const WA_NUM = "261322217709";
 const RETRAIT_MIN = 20000;
+const ADMIN_CODE = "VONJY2026";
 
 let ORDER = {};
 let ME = null;
@@ -594,14 +648,6 @@ window.submitOrder = async (e) => {
             date: new Date().toISOString(),
             commission: 1500
         });
-
-        if (revendeurId) {
-            await updateDoc(doc(db, 'revendeurs', revendeurId), {
-                solde: increment(1500),
-                totalVentes: increment(1),
-                totalGains: increment(1500)
-            });
-        }
 
         const msg = encodeURIComponent(`Bonjour, je viens de commander "${ORDER.title}" (${ORDER.price.toLocaleString('fr')} Ar) via ${paiement === 'mvola' ? 'MVola' : 'Orange Money'}. Nom : ${nom}. Voici ma preuve de paiement :`);
         window.open(`https://wa.me/${WA_NUM}?text=${msg}`, '_blank');
@@ -861,6 +907,16 @@ window.logout = () => {
     document.querySelector('#revendeur .benefits-grid').style.display = 'grid';
     document.getElementById('produits').style.display = 'none';
     document.getElementById('commander').style.display = 'none';
+};
+
+window.goHome = () => {
+    document.getElementById('dashboard').classList.remove('active');
+    document.getElementById('produits').style.display = 'none';
+    document.getElementById('commander').style.display = 'none';
+    document.getElementById('revendeur').style.display = 'none';
+    document.getElementById('hero-btns').style.display = 'flex';
+    closeMenu();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
 async function showDash() {
