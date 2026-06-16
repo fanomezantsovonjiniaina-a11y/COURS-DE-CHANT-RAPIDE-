@@ -465,12 +465,15 @@
             <div class="pay-instructions" id="pay-info"></div>
             <div class="form-group"><label>Code revendeur (optionnel)</label><input type="text" id="o-code" placeholder="Si vous avez un code" style="text-transform:uppercase"></div>
             <div class="form-group" style="background:rgba(240,165,0,0.1);border:1px solid rgba(240,165,0,0.3);border-radius:10px;padding:0.8rem;margin-top:0.5rem">
-                <label style="display:flex;align-items:flex-start;gap:0.6rem;cursor:pointer">
-                    <input type="checkbox" id="o-proof" required style="width:auto;margin-top:0.2rem">
-                    <span style="font-size:0.85rem">⚠️ Je comprends que ma commande ne sera validée que si j'envoie la <strong>capture d'écran de la transaction</strong> dans le message WhatsApp qui va s'ouvrir. Sans cette capture, ma commande reste en attente indéfiniment.</span>
-                </label>
+                <label>📸 Capture d'écran de votre paiement <span style="color:#f0a500">(obligatoire)</span></label>
+                <input type="file" id="o-proof-file" accept="image/*" required style="margin-top:0.5rem">
+                <img id="o-proof-preview" style="display:none;max-width:100%;max-height:160px;margin-top:0.6rem;border-radius:8px">
+                <p style="font-size:0.8rem;margin-top:0.5rem;margin-bottom:0">⚠️ Sans cette capture, l'envoi est bloqué — votre commande ne pourra jamais être validée.</p>
             </div>
-            <button type="submit" class="btn-order" id="btn-order" style="margin-top:0.5rem">✅ Confirmer ma commande</button>
+            <div style="display:flex;gap:0.7rem;margin-top:0.5rem">
+                <button type="button" class="btn-order" style="background:rgba(255,255,255,0.08);color:#fff;flex:1" onclick="closeModal()">⬅ Retour</button>
+                <button type="submit" class="btn-order" id="btn-order" style="flex:2">✅ Confirmer ma commande</button>
+            </div>
         </form>
     </div>
 </div>
@@ -494,6 +497,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
 import { getFirestore, collection, addDoc, getDocs, doc, getDoc, updateDoc, query, where, increment } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-storage.js';
 
 const FIREBASE_CONFIG = {
     apiKey: "AIzaSyBIVvflhCXSn_Kw68DLSCcO4mSm-P2FY60",
@@ -540,6 +544,7 @@ async function loadAdminOrders() {
             <h4>${v.titre} — ${(v.montant || 0).toLocaleString('fr')} Ar</h4>
             <p>Client : ${v.clientNom} (${v.clientTel}) — ${v.paiement === 'mvola' ? 'MVola' : 'Orange Money'}</p>
             <p>Code revendeur : ${v.codeRevendeur || '—'} | Statut : <strong>${v.statut === 'confirme' ? '✅ Confirmé' : '⏳ En attente'}</strong></p>
+            ${v.preuveUrl ? `<a href="${v.preuveUrl}" target="_blank"><img src="${v.preuveUrl}" style="max-width:220px;max-height:220px;border-radius:8px;margin:0.5rem 0;display:block"></a>` : '<p style="color:#ef4444">⚠️ Aucune capture reçue</p>'}
             ${v.statut === 'confirme' ? '' : `<button class="btn-primary" onclick="validateOrder('${v.id}','${v.revendeurId || ''}')">✅ Valider le paiement</button>`}
         </div>
     `).join('');
@@ -560,6 +565,7 @@ window.validateOrder = async (orderId, revendeurId) => {
 const app = initializeApp(FIREBASE_CONFIG);
 const db = getFirestore(app);
 const auth = getAuth(app);
+const storage = getStorage(app);
 const googleProvider = new GoogleAuthProvider();
 
 const MVOLA  = "0381821125";
@@ -610,7 +616,17 @@ window.closeModal = () => {
     document.getElementById('order-modal').classList.remove('active');
     document.getElementById('o-pay').value = '';
     document.getElementById('pay-info').style.display = 'none';
+    document.getElementById('o-proof-file').value = '';
+    document.getElementById('o-proof-preview').style.display = 'none';
 };
+
+document.getElementById('o-proof-file').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    const preview = document.getElementById('o-proof-preview');
+    if (!file) { preview.style.display = 'none'; return; }
+    preview.src = URL.createObjectURL(file);
+    preview.style.display = 'block';
+});
 
 window.showPayInfo = () => {
     const v = document.getElementById('o-pay').value;
@@ -636,6 +652,14 @@ window.submitOrder = async (e) => {
         const tel = document.getElementById('o-tel').value.trim();
         const paiement = document.getElementById('o-pay').value;
         const code = document.getElementById('o-code').value.trim().toUpperCase();
+        const proofFile = document.getElementById('o-proof-file').files[0];
+
+        if (!proofFile) {
+            toast('⚠️ Veuillez ajouter la capture d\'écran de votre paiement avant d\'envoyer.', 'err');
+            btn.disabled = false;
+            btn.innerHTML = '✅ Confirmer ma commande';
+            return;
+        }
 
         let revendeurId = null;
         if (code) {
@@ -643,6 +667,12 @@ window.submitOrder = async (e) => {
             const snap = await getDocs(q);
             if (!snap.empty) revendeurId = snap.docs[0].id;
         }
+
+        btn.innerHTML = '<span class="spin"></span> Envoi de la capture...';
+        const path = `preuves/${Date.now()}_${proofFile.name}`;
+        const fileRef = storageRef(storage, path);
+        await uploadBytes(fileRef, proofFile);
+        const preuveUrl = await getDownloadURL(fileRef);
 
         await addDoc(collection(db, 'commandes'), {
             produit: ORDER.type,
@@ -655,13 +685,14 @@ window.submitOrder = async (e) => {
             revendeurId,
             statut: 'en_attente',
             date: new Date().toISOString(),
-            commission: 1500
+            commission: 1500,
+            preuveUrl
         });
 
-        const msg = encodeURIComponent(`Bonjour, je viens de commander "${ORDER.title}" (${ORDER.price.toLocaleString('fr')} Ar) via ${paiement === 'mvola' ? 'MVola' : 'Orange Money'}. Nom : ${nom}.\n\n📸 IMPORTANT : joignez ici la capture d'écran de votre transaction. Sans cette capture, votre commande ne sera pas validée.`);
+        const msg = encodeURIComponent(`Bonjour, je viens de commander "${ORDER.title}" (${ORDER.price.toLocaleString('fr')} Ar) via ${paiement === 'mvola' ? 'MVola' : 'Orange Money'}. Nom : ${nom}.\n\nMa capture d'écran de paiement a déjà été envoyée sur le site, voici aussi le lien :\n${preuveUrl}`);
         window.open(`https://wa.me/${WA_NUM}?text=${msg}`, '_blank');
 
-        toast('✅ Commande enregistrée ! Sur WhatsApp, joignez la capture d\'écran de paiement — sans elle, la commande ne sera jamais validée.', 'ok');
+        toast('✅ Commande et capture d\'écran envoyées ! Votre commande sera validée après vérification.', 'ok');
         setTimeout(closeModal, 2000);
         e.target.reset();
     } catch (err) {
