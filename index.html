@@ -286,11 +286,19 @@
         </div>
         <div id="tab-ins">
             <form onsubmit="inscrire(event)">
+                <div class="form-group">
+                    <label>Type de compte</label>
+                    <select id="r-type" required onchange="toggleCompteType()">
+                        <option value="">-- Choisissez --</option>
+                        <option value="eleve">🎓 Élève</option>
+                        <option value="revendeur">💼 Revendeur</option>
+                    </select>
+                </div>
                 <div class="form-group"><label>Nom complet</label><input type="text" id="r-nom" placeholder="Votre nom" required></div>
                 <div class="form-group"><label>Numéro de téléphone</label><input type="tel" id="r-tel" placeholder="034 XX XXX XX" required></div>
                 <div class="form-group"><label>Mot de passe (min. 6 caractères)</label><input type="password" id="r-pass" placeholder="••••••" required minlength="6"></div>
-                <div class="form-group"><label>Numéro MVola/Orange Money (pour recevoir vos gains)</label><input type="tel" id="r-pay" placeholder="Numéro de paiement" required></div>
-                <button type="submit" class="btn-order" style="margin-top:1rem" id="btn-ins">Créer mon compte revendeur</button>
+                <div class="form-group" id="r-pay-wrap" style="display:none"><label>Numéro MVola/Orange Money (pour recevoir vos gains)</label><input type="tel" id="r-pay" placeholder="Numéro de paiement"></div>
+                <button type="submit" class="btn-order" style="margin-top:1rem" id="btn-ins">Créer mon compte</button>
             </form>
         </div>
         <div id="tab-con" style="display:none">
@@ -483,17 +491,50 @@ window.switchTab = (tab) => {
     document.getElementById('tab-con').style.display = tab === 'con' ? 'block' : 'none';
 };
 
+window.toggleCompteType = () => {
+    const type = document.getElementById('r-type').value;
+    const payWrap = document.getElementById('r-pay-wrap');
+    const payInput = document.getElementById('r-pay');
+    if (type === 'revendeur') {
+        payWrap.style.display = 'block';
+        payInput.required = true;
+    } else {
+        payWrap.style.display = 'none';
+        payInput.required = false;
+    }
+};
+
 window.inscrire = async (e) => {
     e.preventDefault();
     const btn = document.getElementById('btn-ins');
     btn.disabled = true;
     btn.innerHTML = '<span class="spin"></span> Création...';
     try {
+        const type = document.getElementById('r-type').value;
         const nom = document.getElementById('r-nom').value.trim();
         const telephone = document.getElementById('r-tel').value.trim();
         const pass = document.getElementById('r-pass').value;
-        const numeroPayment = document.getElementById('r-pay').value.trim();
 
+        if (type === 'eleve') {
+            const q = query(collection(db, 'eleves'), where('telephone', '==', telephone));
+            const snap = await getDocs(q);
+            if (!snap.empty) {
+                toast('❌ Ce numéro est déjà inscrit.', 'err');
+                return;
+            }
+            await addDoc(collection(db, 'eleves'), {
+                nom, telephone,
+                password: btoa(pass),
+                dateInscription: new Date().toISOString()
+            });
+            toast('✅ Bienvenue ' + nom + ' ! Choisissez votre formation ci-dessous.', 'ok');
+            e.target.reset();
+            document.getElementById('r-pay-wrap').style.display = 'none';
+            document.getElementById('produits').scrollIntoView({ behavior: 'smooth' });
+            return;
+        }
+
+        const numeroPayment = document.getElementById('r-pay').value.trim();
         const q = query(collection(db, 'revendeurs'), where('telephone', '==', telephone));
         const snap = await getDocs(q);
         if (!snap.empty) {
@@ -522,7 +563,7 @@ window.inscrire = async (e) => {
         toast('❌ Erreur lors de l\\'inscription. Réessayez.', 'err');
     } finally {
         btn.disabled = false;
-        btn.innerHTML = 'Créer mon compte revendeur';
+        btn.innerHTML = 'Créer mon compte';
     }
 };
 
