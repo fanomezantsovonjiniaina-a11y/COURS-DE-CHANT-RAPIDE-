@@ -162,6 +162,10 @@
         .badge-ok { background: rgba(16,185,129,0.2); color: #10b981; }
         .badge-wait { background: rgba(245,158,11,0.2); color: #f59e0b; }
         .empty-state { text-align: center; color: #6b7280; padding: 2rem; font-size: 0.9rem; }
+        .auth-overlay { display: none; position: fixed; inset: 0; background: #0d0d1a; z-index: 2500; overflow-y: auto; }
+        .auth-overlay.active { display: block; }
+        .auth-overlay-close { position: absolute; top: 1.2rem; right: 1.2rem; background: none; border: none; color: #6b7280; font-size: 1.8rem; cursor: pointer; z-index: 2501; }
+        .auth-overlay-inner { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem 0; }
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; padding: 1rem; }
         .modal-overlay.active { display: flex; }
         .modal { background: #1a1030; border: 1px solid rgba(108,61,232,0.3); border-radius: 20px; padding: 2rem; width: 100%; max-width: 480px; position: relative; max-height: 90vh; overflow-y: auto; }
@@ -212,7 +216,7 @@
         <h1>Apprenez à chanter<br><span>rapidement &amp; facilement</span></h1>
         <p>Des cours de chant complets en vidéo, PDF et exercices vocaux pour développer votre voix dès aujourd'hui — livraison rapide après paiement.</p>
         <div class="hero-btns" id="hero-btns">
-            <a href="#gate-msg" class="btn-primary" id="hero-cta" onclick="event.preventDefault();document.getElementById('gate-msg').scrollIntoView({behavior:'smooth',block:'start'});">Continuer avec Google</a>
+            <a href="#gate-msg" class="btn-primary" id="hero-cta" onclick="event.preventDefault();openAuthOverlay();">Continuer avec Google</a>
         </div>
         <div class="hero-stats">
             <div class="stat"><div class="stat-number">500+</div><div class="stat-label">Élèves formés</div></div>
@@ -221,34 +225,41 @@
     </div>
 </section>
 
-<section id="gate-msg" style="text-align:center;padding:2rem 1.5rem">
-    <div class="section-badge" style="margin:0 auto 1rem">🔒 Étape 1</div>
-    <h2 style="margin-bottom:0.5rem">Connectez-vous pour continuer</h2>
-    <p style="color:#aaa;margin-bottom:2rem">Utilisez votre compte Google pour créer votre compte en un clic</p>
-    <div style="max-width:380px;margin:0 auto">
-        <button type="button" onclick="loginWithGoogle()" id="btn-google-gate" style="width:100%;padding:1rem;border-radius:50px;border:1px solid #444;background:#1a1a2e;color:#fff;display:flex;align-items:center;justify-content:center;gap:0.6rem;cursor:pointer;font-weight:700;font-size:1.02rem">
-            <svg width="20" height="20" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.85 2.08-1.81 2.72v2.26h2.92c1.71-1.57 2.69-3.88 2.69-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.71H.96v2.33C2.44 15.98 5.48 18 9 18z"/><path fill="#FBBC05" d="M3.97 10.71c-.18-.54-.28-1.11-.28-1.71s.1-1.17.28-1.71V4.96H.96C.35 6.18 0 7.55 0 9s.35 2.82.96 4.04l3.01-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg>
-            Continuer avec Google
-        </button>
-        <p style="margin-top:1.5rem;color:#6b7280;font-size:0.85rem">Vous préférez un compte par téléphone ? <a href="#" onclick="event.preventDefault();chooseType('eleve')" style="color:#a78bfa">Cliquez ici</a></p>
-    </div>
-</section>
+<div class="auth-overlay" id="auth-overlay">
+    <button type="button" class="auth-overlay-close" onclick="closeAuthOverlay()">✕</button>
+    <div class="auth-overlay-inner">
+        <div style="width:100%">
+            <section id="gate-msg" style="text-align:center;padding:2rem 1.5rem">
+                <div class="section-badge" style="margin:0 auto 1rem">🔒 Étape 1</div>
+                <h2 style="margin-bottom:0.5rem">Connectez-vous pour continuer</h2>
+                <p style="color:#aaa;margin-bottom:2rem">Utilisez votre compte Google pour créer votre compte en un clic</p>
+                <div style="max-width:380px;margin:0 auto">
+                    <button type="button" onclick="loginWithGoogle()" id="btn-google-gate" style="width:100%;padding:1rem;border-radius:50px;border:1px solid #444;background:#1a1a2e;color:#fff;display:flex;align-items:center;justify-content:center;gap:0.6rem;cursor:pointer;font-weight:700;font-size:1.02rem">
+                        <svg width="20" height="20" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.85 2.08-1.81 2.72v2.26h2.92c1.71-1.57 2.69-3.88 2.69-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.71H.96v2.33C2.44 15.98 5.48 18 9 18z"/><path fill="#FBBC05" d="M3.97 10.71c-.18-.54-.28-1.11-.28-1.71s.1-1.17.28-1.71V4.96H.96C.35 6.18 0 7.55 0 9s.35 2.82.96 4.04l3.01-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg>
+                        Continuer avec Google
+                    </button>
+                    <p style="margin-top:1.5rem;color:#6b7280;font-size:0.85rem">Vous préférez un compte par téléphone ? <a href="#" onclick="event.preventDefault();chooseType('eleve')" style="color:#a78bfa">Cliquez ici</a></p>
+                </div>
+            </section>
 
-<section id="type-choice" style="display:none;text-align:center;padding:2rem 1.5rem">
-    <div class="section-badge" style="margin:0 auto 1rem">🔒 Étape 2</div>
-    <h2 style="margin-bottom:0.5rem">Choisissez votre profil</h2>
-    <p style="color:#aaa;margin-bottom:2rem">Bienvenue <span id="tc-nom" style="color:#a78bfa;font-weight:700"></span> ! Comment voulez-vous utiliser votre compte ?</p>
-    <div style="display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;max-width:600px;margin:0 auto">
-        <button type="button" onclick="finishGoogleSignup('eleve')" style="flex:1;min-width:220px;background:rgba(108,61,232,0.1);border:2px solid rgba(108,61,232,0.4);border-radius:16px;padding:2rem 1.5rem;color:#fff;cursor:pointer;font-size:1.05rem;font-weight:700">
-            <div style="font-size:2.5rem;margin-bottom:0.8rem">🎓</div>
-            Je suis Acheteur
-        </button>
-        <button type="button" onclick="finishGoogleSignup('revendeur')" style="flex:1;min-width:220px;background:rgba(240,165,0,0.1);border:2px solid rgba(240,165,0,0.4);border-radius:16px;padding:2rem 1.5rem;color:#fff;cursor:pointer;font-size:1.05rem;font-weight:700">
-            <div style="font-size:2.5rem;margin-bottom:0.8rem">💼</div>
-            Je suis Revendeur
-        </button>
+            <section id="type-choice" style="display:none;text-align:center;padding:2rem 1.5rem">
+                <div class="section-badge" style="margin:0 auto 1rem">🔒 Étape 2</div>
+                <h2 style="margin-bottom:0.5rem">Choisissez votre profil</h2>
+                <p style="color:#aaa;margin-bottom:2rem">Bienvenue <span id="tc-nom" style="color:#a78bfa;font-weight:700"></span> ! Comment voulez-vous utiliser votre compte ?</p>
+                <div style="display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;max-width:600px;margin:0 auto">
+                    <button type="button" onclick="finishGoogleSignup('eleve')" style="flex:1;min-width:220px;background:rgba(108,61,232,0.1);border:2px solid rgba(108,61,232,0.4);border-radius:16px;padding:2rem 1.5rem;color:#fff;cursor:pointer;font-size:1.05rem;font-weight:700">
+                        <div style="font-size:2.5rem;margin-bottom:0.8rem">🎓</div>
+                        Je suis Acheteur
+                    </button>
+                    <button type="button" onclick="finishGoogleSignup('revendeur')" style="flex:1;min-width:220px;background:rgba(240,165,0,0.1);border:2px solid rgba(240,165,0,0.4);border-radius:16px;padding:2rem 1.5rem;color:#fff;cursor:pointer;font-size:1.05rem;font-weight:700">
+                        <div style="font-size:2.5rem;margin-bottom:0.8rem">💼</div>
+                        Je suis Revendeur
+                    </button>
+                </div>
+            </section>
+        </div>
     </div>
-</section>
+</div>
 
 <section id="produits" style="display:none">
     <div class="section-header">
@@ -493,8 +504,19 @@ let ORDER = {};
 let ME = null;
 let pendingGoogleUser = null;
 
+window.openAuthOverlay = () => {
+    document.getElementById('auth-overlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+};
+
+window.closeAuthOverlay = () => {
+    document.getElementById('auth-overlay').classList.remove('active');
+    document.body.style.overflow = '';
+};
+
 window.unlockApp = () => {
     localStorage.setItem('cc_unlocked', '1');
+    closeAuthOverlay();
     document.getElementById('gate-msg').style.display = 'none';
     document.getElementById('type-choice').style.display = 'none';
     document.getElementById('produits').style.display = 'block';
@@ -616,6 +638,7 @@ window.toggleCompteType = () => {
 };
 
 window.chooseType = (type) => {
+    closeAuthOverlay();
     document.getElementById('r-type').value = type;
     toggleCompteType();
     document.getElementById('gate-msg').style.display = 'none';
@@ -704,8 +727,8 @@ window.inscrire = async (e) => {
 };
 
 window.loginWithGoogle = async () => {
-    const btn = document.getElementById('btn-google');
-    btn.disabled = true;
+    const btns = [document.getElementById('btn-google-gate'), document.getElementById('btn-google')].filter(Boolean);
+    btns.forEach(b => b.disabled = true);
     try {
         const result = await signInWithPopup(auth, googleProvider);
         await processGoogleUser(result.user);
@@ -713,12 +736,11 @@ window.loginWithGoogle = async () => {
         console.error(err);
         toast('❌ Erreur: ' + (err.code || err.message || err), 'err');
     } finally {
-        btn.disabled = false;
+        btns.forEach(b => b.disabled = false);
     }
 };
 
 async function processGoogleUser(user) {
-    const btn = document.getElementById('btn-google');
     try {
         const email = user.email;
         const nom = user.displayName || email;
@@ -752,8 +774,6 @@ async function processGoogleUser(user) {
     } catch (err) {
         console.error(err);
         toast('❌ Connexion Google annulée ou échouée.', 'err');
-    } finally {
-        if (btn) btn.disabled = false;
     }
 }
 
