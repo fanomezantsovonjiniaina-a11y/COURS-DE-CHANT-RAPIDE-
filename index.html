@@ -66,6 +66,8 @@
             50% { transform: translate(-50%,-50%) scale(1.1); opacity: 1; }
         }
         .hero-content { position: relative; z-index: 1; }
+        .hero-photo { width: 190px; height: 190px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(167,139,250,0.5); margin: 0 auto 1.2rem; display: block; box-shadow: 0 10px 40px rgba(108,61,232,0.4); }
+        .hero-coach-desc { color: #aaa; font-size: 0.95rem; max-width: 480px; margin: 0.8rem auto 0; }
         .hero-badge { display: inline-block; background: rgba(108,61,232,0.2); border: 1px solid rgba(108,61,232,0.5); color: #a78bfa; padding: 0.45rem 1.1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; margin-bottom: 1.5rem; }
         .hero h1 { font-size: clamp(2.2rem,6vw,4.5rem); font-weight: 900; line-height: 1.08; letter-spacing: -0.02em; margin-bottom: 1.5rem; }
         .hero h1 span { background: linear-gradient(135deg,#a78bfa,#f0a500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -212,8 +214,10 @@
 
 <section class="hero">
     <div class="hero-content">
+        <img src="Gemini_Generated_Image_th5388th5388th53~2.png" alt="Coach Vonjy" class="hero-photo">
         <div class="hero-badge">🎤 Formation vocale professionnelle — Coach Vonjy</div>
         <h1>Apprenez à chanter<br><span>rapidement &amp; facilement</span></h1>
+        <p class="hero-coach-desc">A. Fanomezantsoa Vonjiniaina — Coach vocal, auteur de "Chanter avec Assurance", spécialisé dans l'accompagnement vocal pour aider chacun à chanter avec confiance.</p>
         <p>Des cours de chant complets en vidéo, PDF et exercices vocaux pour développer votre voix dès aujourd'hui — livraison rapide après paiement.</p>
         <div class="hero-btns" id="hero-btns">
             <a href="#gate-msg" class="btn-primary" id="hero-cta" onclick="event.preventDefault();openAuthOverlay();">Continuer avec Google</a>
@@ -298,7 +302,8 @@
             <div class="product-price">15 000 Ar <span>/ PDF complet</span></div>
             <button class="btn-order" onclick="openOrder('pdf','Chanter avec Assurance (PDF)',15000)">Commander maintenant</button>
         </div>
-        <div class="product-card" style="padding-top:2.2rem">
+        <div class="product-card">
+            <img class="product-cover" src="BackgroundEraser_20260525_075055664~2.png" alt="Chanter avec Assurance (Livre imprimé)" style="background:#0d0d1a">
             <div class="product-icon livre">📕</div>
             <h3>Chanter avec Assurance (Livre imprimé)</h3>
             <p>La version papier du guide, imprimée et reliée, livrée chez vous pour chanter juste à tout moment.</p>
