@@ -45,7 +45,7 @@
         .btn-nav { background: linear-gradient(135deg,#6c3de8,#9b5de5); color: white !important; padding: 0.55rem 1.3rem; border-radius: 25px; font-weight: 600; box-shadow: 0 8px 20px rgba(108,61,232,0.35); }
         .hamburger { display: none; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
         .hero {
-            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            min-height: 100vh; min-height: 100dvh; display: flex; align-items: center; justify-content: center;
             text-align: center; padding: 6rem 2rem 4rem;
             background: radial-gradient(ellipse at center, rgba(108,61,232,0.18) 0%, transparent 70%);
             position: relative;
@@ -208,7 +208,7 @@
         <h1>Apprenez à chanter<br><span>rapidement &amp; facilement</span></h1>
         <p>Des cours de chant complets en vidéo, PDF et exercices vocaux pour développer votre voix dès aujourd'hui — livraison rapide après paiement.</p>
         <div class="hero-btns">
-            <a href="#gate-msg" class="btn-primary">Créer mon compte gratuitement</a>
+            <a href="#gate-msg" class="btn-primary" onclick="event.preventDefault();document.getElementById('gate-msg').scrollIntoView({behavior:'smooth',block:'start'});">Créer mon compte gratuitement</a>
         </div>
         <div class="hero-stats">
             <div class="stat"><div class="stat-number">500+</div><div class="stat-label">Élèves formés</div></div>
