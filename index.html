@@ -186,8 +186,7 @@
         <h1>Apprenez à chanter<br><span>rapidement &amp; facilement</span></h1>
         <p>Des cours de chant complets en vidéo, PDF et exercices vocaux pour développer votre voix dès aujourd'hui — livraison rapide après paiement.</p>
         <div class="hero-btns">
-            <a href="#produits" class="btn-primary">Voir les formations</a>
-            <a href="#revendeur" class="btn-outline">Devenir revendeur</a>
+            <a href="#revendeur" class="btn-primary">Créer mon compte gratuitement</a>
         </div>
         <div class="hero-stats">
             <div class="stat"><div class="stat-number">500+</div><div class="stat-label">Élèves formés</div></div>
@@ -197,7 +196,13 @@
     </div>
 </section>
 
-<section id="produits">
+<section id="gate-msg" style="text-align:center;padding:2rem 1.5rem">
+    <div class="section-badge" style="margin:0 auto 1rem">🔒 Accès réservé</div>
+    <h2 style="margin-bottom:0.5rem">Créez un compte pour voir les formations</h2>
+    <p style="color:#aaa">Choisissez <strong>Élève</strong> ou <strong>Revendeur</strong> ci-dessous pour débloquer l'accès aux formations.</p>
+</section>
+
+<section id="produits" style="display:none">
     <div class="section-header">
         <div class="section-badge">📚 Nos formations</div>
         <h2>Choisissez votre <span style="color:#a78bfa">formation</span></h2>
@@ -249,7 +254,7 @@
     </div>
 </section>
 
-<section id="commander">
+<section id="commander" style="display:none">
     <div class="section-header">
         <div class="section-badge">📋 Comment commander</div>
         <h2>Simple &amp; <span style="color:#a78bfa">rapide</span></h2>
@@ -404,6 +409,17 @@ const WA_NUM = "261322217709";
 let ORDER = {};
 let ME = null;
 
+window.unlockApp = () => {
+    localStorage.setItem('cc_unlocked', '1');
+    document.getElementById('gate-msg').style.display = 'none';
+    document.getElementById('produits').style.display = 'block';
+    document.getElementById('commander').style.display = 'block';
+};
+
+if (localStorage.getItem('cc_unlocked') === '1') {
+    document.addEventListener('DOMContentLoaded', unlockApp);
+}
+
 window.openOrder = (type, title, price) => {
     ORDER = { type, title, price };
     document.getElementById('m-title').textContent = title;
@@ -538,6 +554,7 @@ window.inscrire = async (e) => {
             toast('✅ Bienvenue ' + nom + ' ! Choisissez votre formation ci-dessous.', 'ok');
             e.target.reset();
             document.getElementById('r-pay-wrap').style.display = 'none';
+            unlockApp();
             document.getElementById('produits').scrollIntoView({ behavior: 'smooth' });
             return;
         }
@@ -564,6 +581,7 @@ window.inscrire = async (e) => {
 
         ME = { id: docRef.id, nom, telephone, numeroPayment, code, solde: 0, totalVentes: 0, totalGains: 0 };
         toast('✅ Compte revendeur créé ! Votre code : ' + code, 'ok');
+        unlockApp();
         showDash();
         e.target.reset();
     } catch (err) {
@@ -590,6 +608,7 @@ window.loginWithGoogle = async () => {
             const d = snap.docs[0];
             ME = { id: d.id, ...d.data() };
             toast('✅ Connexion réussie, ' + nom + ' !', 'ok');
+            unlockApp();
             showDash();
             return;
         }
@@ -598,6 +617,7 @@ window.loginWithGoogle = async () => {
         snap = await getDocs(q);
         if (!snap.empty) {
             toast('✅ Bienvenue ' + nom + ' ! Choisissez votre formation ci-dessous.', 'ok');
+            unlockApp();
             document.getElementById('produits').scrollIntoView({ behavior: 'smooth' });
             return;
         }
@@ -623,6 +643,7 @@ window.loginWithGoogle = async () => {
             });
             ME = { id: docRef.id, nom, email, numeroPayment, code, solde: 0, totalVentes: 0, totalGains: 0 };
             toast('✅ Compte revendeur créé ! Votre code : ' + code, 'ok');
+            unlockApp();
             showDash();
         } else {
             await addDoc(collection(db, 'eleves'), {
@@ -630,6 +651,7 @@ window.loginWithGoogle = async () => {
                 dateInscription: new Date().toISOString()
             });
             toast('✅ Bienvenue ' + nom + ' ! Choisissez votre formation ci-dessous.', 'ok');
+            unlockApp();
             document.getElementById('produits').scrollIntoView({ behavior: 'smooth' });
         }
     } catch (err) {
@@ -663,6 +685,7 @@ window.connecter = async (e) => {
         }
         ME = { id: d.id, ...data };
         toast('✅ Connexion réussie !', 'ok');
+        unlockApp();
         showDash();
         e.target.reset();
     } catch (err) {
