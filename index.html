@@ -184,9 +184,7 @@
         footer p { color: #4b5563; font-size: 0.85rem; margin-bottom: 0.3rem; }
         .spin { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: rot 0.8s linear infinite; vertical-align: middle; margin-right: 6px; }
         @keyframes rot { to { transform: rotate(360deg); } }
-        .wa-float { position: fixed; bottom: 2rem; left: 2rem; width: 55px; height: 55px; background: #25d366; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; text-decoration: none; z-index: 1000; box-shadow: 0 5px 20px rgba(37,211,102,0.4); transition: transform 0.3s; }
-        .wa-float:hover { transform: scale(1.1); }
-        .back-float { position: fixed; bottom: 2rem; left: 6.5rem; width: 55px; height: 55px; background: #6c3de8; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; text-decoration: none; z-index: 1000; box-shadow: 0 5px 20px rgba(108,61,232,0.4); transition: transform 0.3s; border: none; cursor: pointer; color: #fff; }
+        .back-float { position: fixed; bottom: 2rem; left: 2rem; width: 55px; height: 55px; background: #6c3de8; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; text-decoration: none; z-index: 1000; box-shadow: 0 5px 20px rgba(108,61,232,0.4); transition: transform 0.3s; border: none; cursor: pointer; color: #fff; }
         .back-float:hover { transform: scale(1.1); }
         @media (max-width: 768px) {
             nav { padding: 1rem; }
@@ -422,11 +420,11 @@
             <div class="stats-card"><div class="stats-label">📈 Gains totaux</div><div class="stats-value" id="d-gains">0 Ar</div></div>
         </div>
         <div class="referral-box">
-            <h4>🔗 Votre lien de parrainage</h4>
-            <p>Partagez ce lien — chaque vente via votre lien vous rapporte <strong>1 500 Ar</strong> automatiquement</p>
+            <h4>🏷️ Votre code revendeur</h4>
+            <p>Donnez ce code à vos clients pour qu'ils l'inscrivent dans le champ "Code revendeur" lors de leur commande — chaque vente vous rapporte <strong>1 500 Ar</strong></p>
             <div class="link-row">
-                <input type="text" id="ref-link" readonly>
-                <button class="btn-copy" onclick="copyLink()">📋 Copier</button>
+                <input type="text" id="ref-code" readonly style="font-weight:800;font-size:1.2rem;letter-spacing:1px;color:#f0a500">
+                <button class="btn-copy" onclick="copyCode()">📋 Copier</button>
             </div>
         </div>
         <div class="referral-box">
@@ -492,7 +490,6 @@
 
 <div class="toast" id="toast"></div>
 <button type="button" class="back-float" onclick="goHome()" title="Retour à l'accueil">⬅</button>
-<a href="https://wa.me/261322217709" class="wa-float" target="_blank">💬</a>
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
@@ -610,6 +607,8 @@ function updateLogoutNav() {
 
 window.openAuthOverlay = () => {
     ensureBackState();
+    document.getElementById('gate-msg').style.display = 'block';
+    document.getElementById('type-choice').style.display = 'none';
     document.getElementById('auth-overlay').classList.add('active');
     document.body.style.overflow = 'hidden';
 };
@@ -634,6 +633,7 @@ window.unlockApp = () => {
 window.fullLogout = () => {
     localStorage.removeItem('cc_unlocked');
     ME = null;
+    pendingGoogleUser = null;
     document.getElementById('dashboard').classList.remove('active');
     goHome();
     updateLogoutNav();
@@ -1044,7 +1044,7 @@ async function showDash() {
     document.getElementById('d-solde').textContent = (ME.solde || 0).toLocaleString('fr') + ' Ar';
     document.getElementById('d-ventes').textContent = ME.totalVentes || 0;
     document.getElementById('d-gains').textContent = (ME.totalGains || 0).toLocaleString('fr') + ' Ar';
-    document.getElementById('ref-link').value = `${location.origin}${location.pathname}?ref=${ME.code}`;
+    document.getElementById('ref-code').value = ME.code;
     const solde = ME.solde || 0;
     const btnRetrait = document.getElementById('btn-retrait');
     if (solde >= RETRAIT_MIN) {
@@ -1078,11 +1078,11 @@ async function loadVentes() {
     list.innerHTML = `<table class="ventes-table"><thead><tr><th>Formation</th><th>Commission</th><th>Statut</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
-window.copyLink = () => {
-    const input = document.getElementById('ref-link');
+window.copyCode = () => {
+    const input = document.getElementById('ref-code');
     input.select();
     navigator.clipboard.writeText(input.value);
-    toast('✅ Lien copié !', 'ok');
+    toast('✅ Code copié !', 'ok');
 };
 
 window.toggleMenu = () => document.getElementById('nav-links').classList.toggle('open');
