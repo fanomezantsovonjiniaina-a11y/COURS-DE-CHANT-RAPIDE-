@@ -498,7 +498,7 @@ window.submitOrder = async (e) => {
         e.target.reset();
     } catch (err) {
         console.error(err);
-        toast('❌ Erreur lors de l\\'enregistrement. Réessayez.', 'err');
+        toast("❌ Erreur lors de l'enregistrement. Réessayez.", 'err');
     } finally {
         btn.disabled = false;
         btn.innerHTML = '✅ Confirmer ma commande';
@@ -586,7 +586,7 @@ window.inscrire = async (e) => {
         e.target.reset();
     } catch (err) {
         console.error(err);
-        toast('❌ Erreur lors de l\\'inscription. Réessayez.', 'err');
+        toast("❌ Erreur lors de l'inscription. Réessayez.", 'err');
     } finally {
         btn.disabled = false;
         btn.innerHTML = 'Créer mon compte';
